@@ -79,7 +79,7 @@ function loadClubs() {
     .then(response => response.json())
     .then(clubs => {
       const container = document.getElementById('clubs-container');
-      container.innerHTML = ''; // Clear previous content if any
+      container.innerHTML = '';
       clubs.forEach(club => {
         const checkbox = document.createElement('div');
         checkbox.classList.add('form-check');
