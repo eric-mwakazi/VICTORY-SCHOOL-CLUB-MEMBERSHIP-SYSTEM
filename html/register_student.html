@@ -1,0 +1,55 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Register New Student</h4>
+    </div>
+    <div class="card-body">
+      <form id="registerForm">
+        <div class="mb-3">
+          <label for="admissionNumber" class="form-label">Admission Number</label>
+          <input type="text" class="form-control" id="admissionNumber" required>
+        </div>
+  
+        <div class="mb-3">
+          <label for="studentName" class="form-label">Full Name</label>
+          <input type="text" class="form-control" id="studentName" required>
+        </div>
+  
+        <div class="mb-3">
+          <label for="studentClass" class="form-label">Class (e.g. 2E, 3N)</label>
+          <select class="form-select" id="studentClass" required>
+            <option value="" disabled selected>Select Class</option>
+            <option>1E</option>
+            <option>1N</option>
+            <option>1S</option>
+            <option>1W</option>
+            <option>2E</option>
+            <option>2N</option>
+            <option>2S</option>
+            <option>2W</option>
+            <option>3E</option>
+            <option>3N</option>
+            <option>3S</option>
+            <option>3W</option>
+            <option>4E</option>
+            <option>4N</option>
+            <option>4S</option>
+            <option>4W</option>
+          </select>
+        </div>
+  
+        <div class="mb-3">
+            <label class="form-label">Select Clubs</label>
+            <div id="clubs-container" class="form-check">
+              <!-- Clubs will be loaded via JS -->
+            </div>
+          </div>
+      
+          <div class="mb-3">
+            <label class="form-label">Total Registration Fee: </label>
+            <strong>KES <span id="totalFee">0</span></strong>
+          </div>
+      
+          <button type="submit" class="btn btn-primary">Register Student</button>
+        </form>
+      </div>
+  
