@@ -12,6 +12,14 @@ fetch('html/navbar.html')
         loadRegisterStudent();
       }, { once: true });
     }
+    // Attach listener AFTER navbar is injected
+    const viewClubsLink = document.querySelector('a[href="#view-clubs"]');
+    if (viewClubsLink) {
+      viewClubsLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        loadViewClubs(); // This will load the clubs info
+      }, { once: true });
+    }
   });
 
 // Load footer
@@ -126,3 +134,80 @@ function showAlert(message, type) {
   }
 }
 
+
+
+function loadViewClubs() {
+  fetch('html/view_clubs.html')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('main-content').innerHTML = data;
+      fetchClubDetails(); // Load club data
+    })
+    .catch(err => {
+      showAlert('Failed to load clubs view.', 'danger');
+      console.error(err);
+    });
+}
+function fetchClubDetails() {
+  fetch('api/get_club_details.php')
+    .then(res => res.json())
+    .then(clubs => {
+      const container = document.getElementById('clubs-list');
+      container.innerHTML = '';
+
+      clubs.forEach(club => {
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${club.name}</h5>
+            <p class="card-text">
+              <strong>Total Members:</strong> ${club.total_members}<br>
+              <strong>Total Collected:</strong> KES ${club.total_registration}<br>
+              <strong>Activities:</strong> ${club.activities || 'None'}
+            </p>
+            <button class="btn btn-outline-primary btn-sm" data-club-id="${club.id}">View More</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Add click listeners to buttons
+      container.querySelectorAll('button[data-club-id]').forEach(button => {
+        button.addEventListener('click', e => {
+          const clubId = e.target.getAttribute('data-club-id');
+          viewClubDetails(clubId); // You’ll define this next
+        });
+      });
+    })
+    .catch(err => {
+      showAlert('Could not fetch clubs.', 'danger');
+      console.error(err);
+    });
+}
+function viewClubDetails(clubId) {
+  fetch(`api/get_single_club.php?id=${clubId}`)
+    .then(res => res.json())
+    .then(club => {
+      const container = document.getElementById('main-content');
+      container.innerHTML = `
+        <div class="card shadow-sm">
+          <div class="card-header bg-secondary text-white">
+            <h4>${club.name} - Detailed View</h4>
+          </div>
+          <div class="card-body">
+            <p><strong>Total Members:</strong> ${club.total_members}</p>
+            <p><strong>Finance (KES):</strong> ${club.total_registration}</p>
+            <p><strong>Activities:</strong><br>${club.activities || 'None'}</p>
+            <button class="btn btn-outline-dark" id="backToList">← Back to All Clubs</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('backToList').addEventListener('click', loadViewClubs);
+    })
+    .catch(err => {
+      showAlert('Failed to fetch club details.', 'danger');
+      console.error(err);
+    });
+}
