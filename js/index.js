@@ -170,6 +170,7 @@ function fetchClubDetails() {
           <div class="card-body">
             <h5 class="card-title">${club.name}</h5>
             <p class="card-text">
+              <strong>Club Patron:</strong> ${club.patron_name}<br>
               <strong>Total Members:</strong> ${club.total_members}<br>
               <strong>Total Collected:</strong> KES ${club.total_registration}<br>
               <strong>Activities:</strong> ${club.activities || 'None'}
@@ -204,6 +205,7 @@ function viewClubDetails(clubId) {
             <h4>${club.name} - Detailed View</h4>
           </div>
           <div class="card-body">
+            <p><strong>Club Patron:</strong> ${club.patron_name}</p>
             <p><strong>Total Members:</strong> ${club.total_members}</p>
             <p><strong>Finance (KES):</strong> ${club.total_registration}</p>
             <p><strong>Activities:</strong><br>${club.activities || 'None'}</p>
