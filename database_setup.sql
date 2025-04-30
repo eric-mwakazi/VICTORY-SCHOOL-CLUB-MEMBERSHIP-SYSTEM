@@ -13,7 +13,7 @@ USE victory_school_clubs;
 -- Table: clubs
 CREATE TABLE clubs (
     id INT AUTO_INCREMENT PRIMARY KEY UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     patron_name VARCHAR(100) NOT NULL,
     registration_fee INT NOT NULL,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
