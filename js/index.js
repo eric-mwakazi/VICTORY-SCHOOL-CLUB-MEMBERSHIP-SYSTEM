@@ -12,12 +12,20 @@ fetch('html/navbar.html')
         loadRegisterStudent();
       }, { once: true });
     }
-    // Attach listener AFTER navbar is injected
+    //// This will load the clubs info
     const viewClubsLink = document.querySelector('a[href="#view-clubs"]');
     if (viewClubsLink) {
       viewClubsLink.addEventListener('click', function (e) {
         e.preventDefault();
-        loadViewClubs(); // This will load the clubs info
+        loadViewClubs(); 
+      }, { once: true });
+    }
+      // This will load the students info
+    const studentsLink = document.getElementById("view-students-link");
+    if (studentsLink) {
+      studentsLink.addEventListener("click", function (e) {
+        e.preventDefault();
+        loadStudentView();
       }, { once: true });
     }
   });
@@ -141,7 +149,7 @@ function loadViewClubs() {
     .then(response => response.text())
     .then(data => {
       document.getElementById('main-content').innerHTML = data;
-      fetchClubDetails(); // Load club data
+      fetchClubDetails();
     })
     .catch(err => {
       showAlert('Failed to load clubs view.', 'danger');
@@ -176,7 +184,7 @@ function fetchClubDetails() {
       container.querySelectorAll('button[data-club-id]').forEach(button => {
         button.addEventListener('click', e => {
           const clubId = e.target.getAttribute('data-club-id');
-          viewClubDetails(clubId); // You’ll define this next
+          viewClubDetails(clubId);
         });
       });
     })
@@ -211,3 +219,139 @@ function viewClubDetails(clubId) {
       console.error(err);
     });
 }
+
+
+function loadStudentView() {
+  fetch('html/view_students.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('main-content').innerHTML = html;
+      setTimeout(() => fetchStudents(1), 50);
+    });
+}
+
+function renderPagination(totalPages, currentPage, search) {
+  const container = document.getElementById('paginationControls');
+  container.innerHTML = '';
+
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.className = `btn btn-sm ${i === currentPage ? 'btn-dark' : 'btn-outline-dark'} m-1`;
+    btn.textContent = i;
+    btn.onclick = () => fetchStudents(i, search);
+    container.appendChild(btn);
+  }
+}
+
+function fetchStudents(page = 1, search = '') {
+  fetch(`api/get_students.php?page=${page}&search=${encodeURIComponent(search)}`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById('studentsTableBody');
+      tbody.innerHTML = '';
+
+      if (data.students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No students found.</td></tr>';
+        return;
+      }
+
+      data.students.forEach((student, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${(page - 1) * 10 + index + 1}</td>
+          <td>${student.admission_no}</td>
+          <td>${student.name}</td>
+          <td>${student.class}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-1" onclick="getStudentToUpdate(${student.id})">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteStudent(${student.id})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // ✅ Moved inside here
+      renderPagination(data.total_pages, page, search);
+    })
+    .catch(error => {
+      showAlert('Error fetching students:', "danger");
+    });
+}
+
+
+function getStudentToUpdate(id) {
+  fetch(`api/get_single_student.php?id=${id}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("updateStudentId").value = data.id;
+      document.getElementById("updateAdmissionNo").value = data.admission_no;
+      document.getElementById("updateName").value = data.name;
+      document.getElementById("updateClass").value = data.class;
+      const modalEl = document.getElementById("updateStudentModal");
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    });
+}
+
+
+// Handle form submission to update student
+function updateStudent() {
+  const id = document.getElementById('updateStudentId').value;
+  const admissionNo = document.getElementById('updateAdmissionNo').value;
+  const name = document.getElementById('updateName').value;
+  const studentClass = document.getElementById('updateClass').value;
+
+  fetch(`/api/update_student.php`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: id,
+      admission_no: admissionNo,
+      name: name,
+      class: studentClass,
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Student updated successfully!');
+        fetchStudents(1);
+        bootstrap.Modal.getInstance(document.getElementById("updateStudentModal")).hide();
+      } else {
+        showAlert("Failed to update student!", "danger");
+      }
+    })
+    .catch(error => {
+      console.error('Error updating student:', error);
+      showAlert("Error updating student!", "danger");
+    });
+}
+
+
+// Search functionality
+function searchStudents() {
+  const searchQuery = document.getElementById("searchInput").value.trim();
+  fetchStudents(1, searchQuery);
+}
+
+function debounce(fn, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+function deleteStudent(id) {
+  if (confirm("Are you sure you want to delete this student?")) {
+    fetch(`api/delete_student.php?id=${id}`, { method: 'DELETE' })
+      .then(res => res.text())
+      .then(msg => {
+        showAlert('Student deleted successfully', 'success');
+        fetchStudents(1);
+      });
+  }
+}
+

@@ -1,0 +1,62 @@
+<div class="card shadow">
+  <div class="card-header bg-primary text-white">
+    <h4>Students</h4>
+    <div class="mb-3 d-flex justify-content-between">
+      <input type="text" id="searchInput" class="form-control me-2" placeholder="Search by name or admission no" style="max-width: 800px;">
+      <button class="btn btn-primary" onclick="searchStudents()">
+        <i class="bi bi-search"></i> Search
+      </button>
+    </div>    
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead class="thead-light">
+          <tr>
+            <th>#</th>
+            <th>Admission No</th>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="studentsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer text-center" id="paginationControls"></div>
+</div>
+
+<!-- Update Student Modal -->
+<!-- MODAL: Fixed header with no edit button -->
+<div class="modal fade" id="updateStudentModal" tabindex="-1" aria-labelledby="updateStudentLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="updateStudentForm" onsubmit="event.preventDefault(); updateStudent();"> 
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateStudentLabel">Update Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="updateStudentId">
+          <div class="mb-3">
+            <label for="updateAdmissionNo" class="form-label">Admission No</label>
+            <input type="text" class="form-control" id="updateAdmissionNo" required>
+          </div>
+          <div class="mb-3">
+            <label for="updateName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="updateName" required>
+          </div>
+          <div class="mb-3">
+            <label for="updateClass" class="form-label">Class</label>
+            <input type="text" class="form-control" id="updateClass" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Save Changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
