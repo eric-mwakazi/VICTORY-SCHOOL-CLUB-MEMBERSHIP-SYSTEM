@@ -1,0 +1,29 @@
+<div class="container">
+    <h2 class="text-center">Club Financial Report</h2>
+    <div class="mb-3">
+        <label for="clubSelector" class="form-label">Select Club</label>
+        <select class="form-select" id="clubSelector">
+            <option value="">Select a club</option>
+        </select>
+    </div>
+
+    <div id="report-section" class="mt-4">
+        <h3 id="clubName">Club: -</h3>
+        <canvas id="financeChart" height="100"></canvas>
+
+        <h4>Finance Summary</h4>
+        <table class="table table-bordered">
+            <tbody id="financeTable"></tbody>
+        </table>
+
+        <h4>Activity Summary</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr><th>Activity</th><th>Date</th><th>Amount Collected</th></tr>
+            </thead>
+            <tbody id="activityTable"></tbody>
+        </table>
+    </div>
+
+    <button class="btn btn-primary mt-3" onclick="downloadPDF()">Download PDF</button>
+</div>

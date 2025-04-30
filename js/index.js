@@ -28,7 +28,17 @@ fetch('html/navbar.html')
         loadStudentView();
       }, { once: true });
     }
+
+          // This will load the reports info
+          const reportsLink = document.getElementById('a[href="#view-reports]"');
+          if (reportsLink) {
+            reportsLink.addEventListener("click", function (e) {
+              e.preventDefault();
+              loadReports();
+            }, { once: true });
+          }
   });
+  
 
 // Load footer
 fetch('html/footer.html')
