@@ -15,24 +15,36 @@ CREATE TABLE clubs (
     id INT AUTO_INCREMENT PRIMARY KEY UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
     patron_name VARCHAR(100) NOT NULL,
-    registration_fee INT NOT NULL
+    registration_fee INT NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Table: Patrons
+CREATE TABLE students (
+    id INT AUTO_INCREMENT PRIMARY KEY UNIQUE,
+    patron_id VARCHAR(20) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    club_id VARCHAR(5) NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 -- Table: students
 CREATE TABLE students (
     id INT AUTO_INCREMENT PRIMARY KEY UNIQUE,
     admission_no VARCHAR(20) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    class VARCHAR(5) NOT NULL
+    class VARCHAR(5) NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 -- Table: memberships
 CREATE TABLE memberships (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT,
     club_id INT,
     role ENUM('Regular', 'Executive') DEFAULT 'Regular',
+    status ENUM('ACTIVE', 'LEFT') DEFAULT 'ACTIVE',
     year YEAR NOT NULL,
+    date_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date_left TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),
     FOREIGN KEY (club_id) REFERENCES clubs(id)
 );
@@ -44,6 +56,7 @@ CREATE TABLE club_activities (
     activity_name VARCHAR(100) NOT NULL UNIQUE,
     date_of_activity DATE NOT NULL,
     amount_collected INT NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (club_id) REFERENCES clubs(id)
 );
 

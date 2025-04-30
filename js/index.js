@@ -234,9 +234,25 @@ function viewClubDetails(clubId) {
       document.getElementById('addSelectedStudentBtn').addEventListener('click', () => {
         addSelectedStudentToClub(club.id);
       });
+      // ✅ View Members button handler
+      document.getElementById('viewMemberDetails').onclick = () => viewClubMembers(club.id);
     })
     .catch(err => {
       showAlert('Failed to load club details.', 'danger');
+      console.error(err);
+    });
+}
+
+function viewClubMembers(clubId) {
+  fetch('html/track_members.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('main-content').innerHTML = html;
+      window.currentClubId = clubId;
+      loadClubMembers(clubId);
+    })
+    .catch(err => {
+      showAlert('Failed to load club members view.', 'danger');
       console.error(err);
     });
 }
@@ -475,7 +491,6 @@ function fetchStudents(page = 1, search = '') {
         tbody.appendChild(row);
       });
 
-      // ✅ Moved inside here
       renderPagination(data.total_pages, page, search);
     })
     .catch(error => {
@@ -586,7 +601,7 @@ function submitNewActivity() {
       if (data.success) {
         showAlert('Activity added successfully.', 'success');
         bootstrap.Modal.getInstance(document.getElementById('addActivityModal')).hide();
-        viewClubDetails(clubId); // Refresh view
+        viewClubDetails(clubId);
       } else {
         showAlert('Error adding activity: ' + (data.error || ''), 'danger');
       }
@@ -594,5 +609,144 @@ function submitNewActivity() {
     .catch(err => {
       console.error(err);
       showAlert('Network error. Try again.', 'danger');
+    });
+}
+
+
+function removeMember(memberId) {
+  fetch('api/remove_member.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: memberId })
+  }).then(res => res.json())
+    .then(resp => {
+      if (resp.success) loadClubMembers(window.currentClubId);
+    });
+}
+
+function paginateTable(data, tableBodyId, paginationDivId, pageSize = 10) {
+  let currentPage = 1;
+  const tableBody = document.getElementById(tableBodyId);
+  const pagination = document.getElementById(paginationDivId);
+
+  function renderPage(page) {
+    currentPage = page;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    tableBody.innerHTML = data.slice(start, end).map((member, i) => `
+      <tr>
+        <td>${member.name}</td>
+        <td>${member.admission_no}</td>
+        <td>${member.role}</td>
+        <td>${member.status}</td>
+        <td>${member.date_joined}</td>
+        ${member.status === 'LEFT' ? `<td>${member.date_left}</td>` : ''}
+        ${member.status === 'ACTIVE' ? `<td><button onclick="removeMember(${member.id})" class="btn btn-sm btn-danger">Remove</button></td>` : ''}
+      </tr>
+    `).join('');
+
+    renderPaginationButtons(data.length, pagination, renderPage);
+  }
+
+  renderPage(1);
+}
+
+function loadClubMembers(clubId) {
+  fetch(`api/get_members.php?club_id=${clubId}`)
+    .then(res => res.json())
+    .then(data => {
+      window.currentMembers = data;
+      paginateTable(data.active, 'activeMembersTableBody', 'activePagination', true);
+      paginateTable(data.left, 'pastMembersTableBody', 'pastPagination', false);
+    })
+    .catch(err => {
+      showAlert("Failed to load members", "danger");
+      console.error(err);
+    });
+}
+
+function paginateTable(data, tableBodyId, paginationDivId, canRemove = false, pageSize = 10) {
+  let currentPage = 1;
+  const tableBody = document.getElementById(tableBodyId);
+  const pagination = document.getElementById(paginationDivId);
+
+  function renderPage(page) {
+    currentPage = page;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const rows = data.slice(start, end).map(member => `
+      <tr>
+        <td>${member.name}</td>
+        <td>${member.admission_no}</td>
+        <td>${member.role}</td>
+        <td>${member.status}</td>
+        <td>${member.date_joined}</td>
+        ${member.status === 'LEFT' ? `
+          <td>${member.date_left}</td>
+          <td><button onclick="reactivateMember(${member.id})" class="btn btn-sm btn-success">Add Back</button></td>
+        ` : 
+        (canRemove ? `<td><button onclick="removeMember(${member.id})" class="btn btn-sm btn-danger">Remove</button></td>` : '')
+        }
+      </tr>
+    `).join('');
+    tableBody.innerHTML = rows;
+    renderPaginationButtons(data.length, page, pagination, renderPage);
+  }
+
+  renderPage(1);
+}
+
+function renderPaginationButtons(totalItems, currentPage, container, onPageClick, pageSize = 10) {
+  const pageCount = Math.ceil(totalItems / pageSize);
+  container.innerHTML = '';
+
+  for (let i = 1; i <= pageCount; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = `btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-outline-primary'} mx-1`;
+    btn.onclick = () => onPageClick(i);
+    container.appendChild(btn);
+  }
+}
+
+function removeMember(memberId) {
+  if (!confirm("Are you sure you want to remove this member?")) return;
+
+  fetch('api/remove_member.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ membership_id: memberId })
+  })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.success) {
+        showAlert("Member removed", "success");
+        loadClubMembers(window.currentClubId);
+      } else {
+        showAlert(resp.message || "Failed to remove", "danger");
+      }
+    });
+}
+
+function reactivateMember(memberId) {
+  if (!confirm("Add this member back to the club?")) return;
+
+  fetch('api/reactivate_member.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ membership_id: memberId })
+  })
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.success) {
+        showAlert("Member reactivated", "success");
+        loadClubMembers(window.currentClubId);
+      } else {
+        showAlert(resp.message || "Failed to reactivate", "danger");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showAlert("Something went wrong", "danger");
     });
 }
