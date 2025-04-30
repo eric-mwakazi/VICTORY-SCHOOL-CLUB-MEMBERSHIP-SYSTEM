@@ -20,6 +20,7 @@ if (
     exit;
 }
 
+
 $admission_no = mysqli_real_escape_string($conn, $_POST['admission_no']);
 $studentRole = mysqli_real_escape_string($conn, $_POST['studentRole']);
 $studentStream = mysqli_real_escape_string($conn, $_POST['studentStream']);

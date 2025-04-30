@@ -156,6 +156,7 @@ function loadViewClubs() {
       console.error(err);
     });
 }
+
 function fetchClubDetails() {
   fetch('api/get_club_details.php')
     .then(res => res.json())
@@ -194,6 +195,7 @@ function fetchClubDetails() {
       console.error(err);
     });
 }
+
 function viewClubDetails(clubId) {
   fetch(`api/get_single_club.php?id=${clubId}`)
     .then(res => res.json())
@@ -209,18 +211,110 @@ function viewClubDetails(clubId) {
             <p><strong>Total Members:</strong> ${club.total_members}</p>
             <p><strong>Finance (KES):</strong> ${club.total_registration}</p>
             <p><strong>Activities:</strong><br>${club.activities || 'None'}</p>
-            <button class="btn btn-outline-dark" id="backToList">← Back to All Clubs</button>
+
+            <hr>
+            <h5>Add Member</h5>
+            <input type="text" id="studentSearchInput" placeholder="Search by name or admission" class="form-control mb-2">
+            <ul id="studentSearchResults" class="list-group mb-2"></ul>
+            <button class="btn btn-primary" id="addSelectedStudentBtn" disabled>Add to Club</button>
+            <br>
+            <button class="btn btn-outline-dark mt-3" id="backToList">← Back to All Clubs</button>
           </div>
         </div>
       `;
 
-      document.getElementById('backToList').addEventListener('click', loadViewClubs);
+      // Attach event listeners after HTML is rendered
+      const backButton = document.getElementById('backToList');
+      if (backButton) backButton.addEventListener('click', loadViewClubs);
+
+      const searchInput = document.getElementById('studentSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          // pass clubId if needed
+          searchStudent(e.target.value, club.id); 
+        });
+      }
+
+      const addBtn = document.getElementById('addSelectedStudentBtn');
+      if (addBtn) {
+        addBtn.addEventListener('click', () => {
+          // Implement this function
+          addSelectedStudentToClub(club.id); 
+        });
+      }
     })
     .catch(err => {
       showAlert('Failed to fetch club details.', 'danger');
       console.error(err);
     });
 }
+
+
+let selectedStudentId = null;
+
+function searchStudent(query) {
+  if (!query) return;
+
+  fetch(`api/search_students.php?q=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(students => {
+      const results = document.getElementById('studentSearchResults');
+      results.innerHTML = '';
+      students.forEach(student => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item list-group-item-action';
+        li.textContent = `${student.name} (${student.admission_no})`;
+        li.onclick = () => {
+          selectedStudentId = student.id;
+          document.getElementById('studentSearchInput').value = student.name;
+          document.getElementById('addSelectedStudentBtn').disabled = false;
+          results.innerHTML = '';
+        };
+        results.appendChild(li);
+      });
+    });
+}
+
+function addSelectedStudentToClub(clubId) {
+  if (!selectedStudentId) return alert('Please select a student to add.');
+
+  fetch('api/add_membership.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      student_id: selectedStudentId,
+      club_id: clubId,
+      year: new Date().getFullYear(),
+      role: 'Regular'
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('Student added to club successfully.', 'success');
+        // Refresh club view
+        viewClubDetails(clubId); 
+      } else {
+        showAlert(data.message || 'Failed to add student.', 'danger');
+      }
+    })
+    .catch(err => {
+      console.error('Error adding student:', err);
+      showAlert('Error adding student to club.', 'danger');
+    });
+}
+
+
+
+
+
+
+
+
+
+
 
 
 function loadStudentView() {

@@ -1,11 +1,17 @@
 <?php
 require 'db_connection.php';
 header('Content-Type: application/json');
+// Default to 0 if not set
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;  
 
-$id = intval($_GET['id']);
+if ($id <= 0) {
+  echo json_encode(["error" => "Invalid club ID"]);
+  exit;
+}
+
 
 $sql = "
-  SELECT c.name,c.patron_name,
+  SELECT c.id, c.name, c.patron_name,
     COALESCE(COUNT(DISTINCT m.id), 0) as total_members,
     COALESCE(f.total_registration, 0) as total_registration,
     COALESCE(GROUP_CONCAT(DISTINCT a.activity_name SEPARATOR ', '), '') as activities

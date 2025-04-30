@@ -1,5 +1,6 @@
 
 -- prepares a MySQL server for the project
+DROP DATABASE IF EXISTS victory_school_clubs;
 CREATE DATABASE IF NOT EXISTS victory_school_clubs;
 CREATE USER IF NOT EXISTS 'victory_school_clubs'@'localhost' IDENTIFIED BY 'victory_school_clubs';
 GRANT ALL PRIVILEGES ON `victory_school_clubs`.* TO 'victory_school_clubs'@'localhost';
@@ -11,7 +12,7 @@ USE victory_school_clubs;
 
 -- Table: clubs
 CREATE TABLE clubs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
     patron_name VARCHAR(100) NOT NULL,
     registration_fee INT NOT NULL
@@ -19,7 +20,7 @@ CREATE TABLE clubs (
 
 -- Table: students
 CREATE TABLE students (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY UNIQUE,
     admission_no VARCHAR(20) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     class VARCHAR(5) NOT NULL
@@ -68,18 +69,18 @@ INSERT INTO clubs (name, patron_name, registration_fee) VALUES
 ('Debate Club', 'Mr. Mutua', 400);
 
 -- Insert into students
--- INSERT INTO students (admission_no, name, class) VALUES
--- ('ADM001', 'Alice Achieng', '4B'),
--- ('ADM002', 'Brian Kiprotich', '3A'),
--- ('ADM003', 'Cynthia Mwangi', '2C'),
--- ('ADM004', 'David Njoroge', '1D');
+INSERT INTO students (admission_no, name, class) VALUES
+('ADM001', 'Alice Achieng', '4B'),
+('ADM002', 'Brian Kiprotich', '3A'),
+('ADM003', 'Cynthia Mwangi', '2C'),
+('ADM004', 'David Njoroge', '1D');
 
--- -- Insert into memberships
--- INSERT INTO memberships (student_id, club_id, role, year) VALUES
--- (1, 1, 'Executive', 2024),
--- (2, 1, 'Regular', 2024),
--- (3, 2, 'Executive', 2024),
--- (4, 3, 'Regular', 2024);
+-- Insert into memberships
+INSERT INTO memberships (student_id, club_id, role, year) VALUES
+(1, 1, 'Executive', 2024),
+(2, 1, 'Regular', 2024),
+(3, 2, 'Executive', 2024),
+(4, 3, 'Regular', 2024);
 
 -- Insert into club_activities
 INSERT INTO club_activities (club_id, activity_name, date_of_activity, amount_collected) VALUES
