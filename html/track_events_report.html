@@ -1,0 +1,29 @@
+<div class="container">
+  <h2 class="text-center">Club Activities & Events Report</h2>
+  <div class="mb-3">
+      <label for="clubSelector" class="form-label">Select Club</label>
+      <select class="form-select" id="clubSelector">
+          <option value="">Select a club</option>
+      </select>
+  </div>
+
+  <div id="report-section" class="mt-4">
+      <h3 id="clubName">Club: -</h3>
+
+      <!-- Graphs Section -->
+      <h4>Event Frequency & Registration Growth</h4>
+      <canvas id="eventFrequencyChart" height="100"></canvas>
+      <canvas id="registrationGrowthChart" height="100"></canvas>
+
+      <!-- Activity Summary -->
+      <h4>Activities & Events Summary</h4>
+      <table class="table table-bordered">
+          <thead>
+              <tr><th>Activity Name</th><th>Date</th><th>Amount Collected</th></tr>
+          </thead>
+          <tbody id="activityTable"></tbody>
+      </table>
+  </div>
+
+  <button class="btn btn-primary mt-3" onclick="downloadPDF()">Download PDF</button>
+</div>

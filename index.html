@@ -1,39 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Victory School Clubs - Home</title>
-        <link rel="stylesheet" href="./css/style.css">
-      
-        <!-- Bootstrap CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <!-- Bootstrap JS Bundle (includes Popper) -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-      
-        <!-- Chart.js -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-      
-        <!-- ✅ html2pdf.js must be included -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-      
-        <!-- Your JS -->
-        <script src="./js/reports.js" defer></script>
-      </head>
-      
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Victory School Clubs - Home</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Your Custom CSS -->
+  <link rel="stylesheet" href="./css/style.css">
+
+  <!-- Animation Library (AOS for Scroll Animations) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    /* Animation for Hero Section */
+    .hero h1 {
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    .hero p {
+      animation: fadeIn 2s 0.5s ease-in-out;
+    }
+
+    /* Add hover effect to feature boxes */
+    .feature-box:hover {
+      transform: translateY(-10px);
+      transition: transform 0.3s ease;
+    }
+
+    /* Simple Fade-In Animation */
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hover effect for call-to-action button */
+    .btn-cta {
+      transition: all 0.3s ease;
+    }
+
+    .btn-cta:hover {
+      background-color: #007bff;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* Scroll animations */
+    .team-member {
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .team-member-visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+
 <body>
 
-<!-- Navbar -->
-<div id="navbar-placeholder"></div>
-<div id="alert-placeholder"></div>
-<!-- Main Content -->
-<main class="container mt-4" id="main-content">
-    <h1 class="text-center">Welcome to Victory School Club Membership System</h1>
-    <p class="text-center">Select an action from the navigation menu above to get started.</p>
-</main>  
-<!-- Footer -->
-<div id="footer-placeholder"></div>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
 
-    <script src="./js/index.js"></script>
-    <script src="./js/reports.js"></script>
+  <!-- Main Content -->
+  <main class="container mt-4" id="main-content">
+
+    <!-- Hero Section -->
+    <section class="hero" data-aos="fade-up">
+        <h1>Welcome to Victory School Inventory Manager</h1>
+        <p>Efficiently track, manage, and report on all school inventory items.</p>
+      </section>
+  
+      <!-- Features Section -->
+      <section class="features container mt-5">
+        <div class="row">
+          <div class="col-md-4 feature-box text-center" data-aos="fade-up" data-aos-delay="200">
+            <img src="https://cdn-icons-png.flaticon.com/512/929/929479.png" width="60" alt="Track">
+            <h5>Real-Time Tracking</h5>
+            <p>Monitor all items in different departments in real-time and avoid stock-outs or overstock.</p>
+          </div>
+          <div class="col-md-4 feature-box text-center" data-aos="fade-up" data-aos-delay="400">
+            <img src="https://cdn-icons-png.flaticon.com/512/2920/2920389.png" width="60" alt="Reports">
+            <h5>Detailed Reports</h5>
+            <p>Generate monthly, termly, or yearly reports on stock movement, usage, and audits.</p>
+          </div>
+          <div class="col-md-4 feature-box text-center" data-aos="fade-up" data-aos-delay="600">
+            <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" width="60" alt="Users">
+            <h5>User Roles</h5>
+            <p>Admins, storekeepers, and department heads get personalized dashboards and access control.</p>
+          </div>
+        </div>
+      </section>
+  
+      <!-- Team Section -->
+      <section class="team-section">
+        <div class="container text-center">
+          <h2>Meet Our Team</h2>
+          <div class="row">
+            <div class="col-md-3 team-member" data-aos="fade-up">
+              <img src="https://via.placeholder.com/150" alt="Principal" class="img-fluid rounded-circle">
+              <h4>Mr. John Doe</h4>
+              <p>Principal</p>
+            </div>
+            <div class="col-md-3 team-member" data-aos="fade-up" data-aos-delay="100">
+              <img src="https://via.placeholder.com/150" alt="Deputy" class="img-fluid rounded-circle">
+              <h4>Ms. Jane Smith</h4>
+              <p>Deputy Principal</p>
+            </div>
+            <div class="col-md-3 team-member" data-aos="fade-up" data-aos-delay="200">
+              <img src="https://via.placeholder.com/150" alt="Discipline Master" class="img-fluid rounded-circle">
+              <h4>Mr. Chris K.</h4>
+              <p>Discipline Master</p>
+            </div>
+            <div class="col-md-3 team-member" data-aos="fade-up" data-aos-delay="300">
+              <img src="https://via.placeholder.com/150" alt="Club Patron" class="img-fluid rounded-circle">
+              <h4>Mrs. Mary W.</h4>
+              <p>Club Patron</p>
+            </div>
+          </div>
+        </div>
+      </section>
+  
+      <!-- Mission and Vision Section -->
+      <section class="mission-vision bg-primary text-white py-5">
+        <div class="container text-center" data-aos="fade-up">
+          <h2>Our Mission & Vision</h2>
+          <p><strong>Mission:</strong> To provide high-quality education and prepare students for a successful future.</p>
+          <p><strong>Vision:</strong> Excellence in learning and innovation, shaping future leaders.</p>
+          <h3>School Motto: <em>"Success Through Enhanced Effort"</em></h3>
+        </div>
+      </section>
+  
+      <!-- Call to Action Section -->
+      <section class="cta text-center py-5">
+        <h2>Start Managing Inventory Smartly</h2>
+        <p>Our system brings transparency and efficiency to your school's inventory operations.</p>
+      </section>
+  </main>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- AOS Library for Scroll Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+  <!-- Initialize AOS -->
+  <script>
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-in-out',
+      once: true
+    });
+  </script>
+
+  <!-- Your Custom JS -->
+  <script src="./js/index.js"></script>
+  <script src="./js/reports.js"></script>
+
 </body>
 </html>

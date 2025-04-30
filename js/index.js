@@ -29,14 +29,16 @@ fetch('html/navbar.html')
       }, { once: true });
     }
 
-          // This will load the reports info
-          const reportsLink = document.getElementById('a[href="#view-reports]"');
-          if (reportsLink) {
-            reportsLink.addEventListener("click", function (e) {
-              e.preventDefault();
-              loadReports();
-            }, { once: true });
+    // Ensure dropdown functionality is triggered for the Reports link
+    const reportsLink = document.getElementById('view-reports');
+    if (reportsLink) {
+        reportsLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            // Toggle the dropdown menu
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+            dropdownMenu.classList.toggle('show')}, { once: true });
           }
+      
   });
   
 
