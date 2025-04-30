@@ -11,7 +11,7 @@ if ($id <= 0) {
 
 
 $sql = "
-  SELECT c.id, c.name, c.patron_name,
+  SELECT c.id, c.name, c.patron_name, c.registration_fee,
     COALESCE(COUNT(DISTINCT m.id), 0) as total_members,
     COALESCE(f.total_registration, 0) as total_registration,
     COALESCE(GROUP_CONCAT(DISTINCT a.activity_name SEPARATOR ', '), '') as activities

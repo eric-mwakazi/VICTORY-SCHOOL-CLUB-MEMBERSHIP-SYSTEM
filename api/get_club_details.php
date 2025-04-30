@@ -3,7 +3,7 @@ require 'db_connection.php';
 header('Content-Type: application/json');
 
 $sql = "
-  SELECT c.id, c.name, c.patron_name,
+  SELECT c.id, c.name, c.patron_name, c.registration_fee,
     COALESCE(COUNT(DISTINCT m.id), 0) AS total_members,
     COALESCE(f.total_registration, 0) AS total_registration,
     COALESCE(GROUP_CONCAT(DISTINCT a.activity_name SEPARATOR ', '), '') AS activities
