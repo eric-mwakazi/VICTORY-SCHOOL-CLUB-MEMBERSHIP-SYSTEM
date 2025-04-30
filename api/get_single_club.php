@@ -11,17 +11,29 @@ if ($id <= 0) {
 
 
 $sql = "
-  SELECT c.id, c.name, c.patron_name, c.registration_fee,
+SELECT c.id, c.name, c.patron_name, c.registration_fee,
     COALESCE(COUNT(DISTINCT m.id), 0) as total_members,
-    COALESCE(f.total_registration, 0) as total_registration,
-    COALESCE(GROUP_CONCAT(DISTINCT a.activity_name SEPARATOR ', '), '') as activities
-  FROM clubs c
-  LEFT JOIN memberships m ON c.id = m.club_id AND m.year = YEAR(CURDATE())
-  LEFT JOIN club_finances f ON c.id = f.club_id
-  LEFT JOIN club_activities a ON c.id = a.club_id
-  WHERE c.id = $id
-  GROUP BY c.id
+    COALESCE(f.total_registration, 0) +
+    COALESCE(f.total_activity_income, 0) +
+    COALESCE(f.ongoing_activities_fund, 0) +
+    COALESCE(f.annual_party_fund, 0) +
+    COALESCE(f.savings, 0) +
+    COALESCE(f.school_contribution, 0) as total_income,
+    COALESCE(
+      JSON_ARRAYAGG(
+        JSON_OBJECT('name', a.activity_name, 'date', a.date_of_activity, 'amount', a.amount_collected)
+      ), '[]'
+    ) as activities
+FROM clubs c
+LEFT JOIN memberships m ON c.id = m.club_id AND m.year = YEAR(CURDATE())
+LEFT JOIN club_finances f ON c.id = f.club_id
+LEFT JOIN club_activities a ON c.id = a.club_id
+WHERE c.id = $id
+GROUP BY c.id
+
 ";
+
+
 
 $result = mysqli_query($conn, $sql);
 $club = mysqli_fetch_assoc($result);

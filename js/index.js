@@ -201,7 +201,8 @@ function viewClubDetails(clubId) {
   fetch(`api/get_single_club.php?id=${clubId}`)
     .then(res => res.json())
     .then(club => {
-      window.currentClubId = clubId; // For later use in submitNewActivity
+      window.currentClubId = clubId; // For use in other functions
+      window.clubActivities = JSON.parse(club.activities || '[]');
 
       const container = document.getElementById('main-content');
       container.innerHTML = `
@@ -219,16 +220,36 @@ function viewClubDetails(clubId) {
               <label><strong>Registration Fee (KES):</strong></label>
               <input type="number" class="form-control" id="editRegFee" value="${club.registration_fee}">
             </div>
+            <p><strong>Total Members:</strong> ${club.total_members}</p>
+            <p><strong>Finance (KES):</strong> ${club.total_income}</p>
             <div class="mb-3">
               <label><strong>Activities:</strong></label>
-              <textarea class="form-control" id="editActivities" rows="3">${club.activities || ''}</textarea>
+              <table class="table table-bordered">
+                <thead class="table-secondary">
+                  <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Amount (KES)</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="activitiesTableBody">
+                  ${
+                    window.clubActivities.map((act, index) => `
+                      <tr data-index="${index}">
+                        <td><input type="text" class="form-control" value="${act.name}" onchange="updateActivityField(${index}, 'name', this.value)"></td>
+                        <td><input type="date" class="form-control" value="${act.date}" onchange="updateActivityField(${index}, 'date', this.value)"></td>
+                        <td><input type="number" class="form-control" value="${act.amount}" onchange="updateActivityField(${index}, 'amount', this.value)"></td>
+                        <td><button class="btn btn-sm btn-danger" onclick="deleteActivity(${index})">🗑️</button></td>
+                      </tr>
+                    `).join('')
+                  }
+                </tbody>
+              </table>
             </div>
+
             <button class="btn btn-success mb-3" onclick="updateClubDetails(${club.id})">Save Changes</button>
             <button class="btn btn-warning mb-3 ms-2" data-bs-toggle="modal" data-bs-target="#addActivityModal">➕ Add New Activity</button>
-
-            <p><strong>Total Members:</strong> ${club.total_members}</p>
-            <p><strong>Finance (KES):</strong> ${club.total_registration}</p>
-
             <hr>
             <h5>Add Member</h5>
             <input type="text" id="studentSearchInput" placeholder="Search by name or admission" class="form-control mb-2">
@@ -261,6 +282,7 @@ function viewClubDetails(clubId) {
         </div>
       `;
 
+      // Event Listeners
       document.getElementById('backToList').addEventListener('click', loadViewClubs);
       document.getElementById('studentSearchInput').addEventListener('input', (e) => {
         searchStudent(e.target.value, club.id);
@@ -274,6 +296,72 @@ function viewClubDetails(clubId) {
       console.error(err);
     });
 }
+
+
+function updateClubDetails(clubId) {
+  const patronName = document.getElementById('editPatronName').value.trim();
+  const regFee = parseFloat(document.getElementById('editRegFee').value);
+
+  if (!patronName || isNaN(regFee)) {
+    showAlert('Please fill all required fields correctly.', 'warning');
+    return;
+  }
+
+  const updatedData = {
+    id: clubId,
+    patron_name: patronName,
+    registration_fee: regFee,
+    activities: JSON.stringify(window.clubActivities)
+  };
+
+  fetch('api/update_club.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedData)
+  })
+    .then(res => res.json())
+    .then(response => {
+      if (response.success) {
+        showAlert('Club updated successfully.', 'success');
+        // Refresh view
+        viewClubDetails(clubId); 
+      } else {
+        showAlert(response.message || 'Update failed.', 'danger');
+      }
+    })
+    .catch(err => {
+      showAlert('Error updating club.', 'danger');
+      console.error(err);
+    });
+}
+
+
+function updateActivityField(index, field, value) {
+  if (window.clubActivities[index]) {
+    window.clubActivities[index][field] = value;
+  }
+}
+
+function deleteActivity(index) {
+  window.clubActivities.splice(index, 1);
+  viewClubDetails(window.currentClubId);
+}
+
+function submitNewActivity() {
+  const name = document.getElementById('activityName').value.trim();
+  const date = document.getElementById('activityDate').value;
+  const amount = parseFloat(document.getElementById('activityAmount').value);
+
+  if (!name || !date || isNaN(amount)) {
+    alert("Please fill in all activity fields.");
+    return;
+  }
+
+  window.clubActivities.push({ name, date, amount });
+  document.querySelector('#addActivityModal .btn-close').click();
+  viewClubDetails(window.currentClubId);
+}
+
 
 
 
@@ -377,11 +465,6 @@ function deleteClub(clubId) {
       console.error(err);
     });
 }
-
-
-
-
-
 
 
 
