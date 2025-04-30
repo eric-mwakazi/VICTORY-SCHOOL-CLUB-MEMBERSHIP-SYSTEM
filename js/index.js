@@ -201,18 +201,33 @@ function viewClubDetails(clubId) {
   fetch(`api/get_single_club.php?id=${clubId}`)
     .then(res => res.json())
     .then(club => {
+      window.currentClubId = clubId; // For later use in submitNewActivity
+
       const container = document.getElementById('main-content');
       container.innerHTML = `
         <div class="card shadow-sm">
-          <div class="card-header bg-secondary text-white">
+          <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
             <h4>${club.name} - Detailed View</h4>
+            <button class="btn btn-danger btn-sm" onclick="deleteClub(${club.id})">Delete Club</button>
           </div>
           <div class="card-body">
-            <p><strong>Club Patron:</strong> ${club.patron_name}</p>
-            <p><strong>Registration Fee:</strong> ${club.registration_fee}</p>
+            <div class="mb-3">
+              <label><strong>Club Patron:</strong></label>
+              <input type="text" class="form-control" id="editPatronName" value="${club.patron_name}">
+            </div>
+            <div class="mb-3">
+              <label><strong>Registration Fee (KES):</strong></label>
+              <input type="number" class="form-control" id="editRegFee" value="${club.registration_fee}">
+            </div>
+            <div class="mb-3">
+              <label><strong>Activities:</strong></label>
+              <textarea class="form-control" id="editActivities" rows="3">${club.activities || ''}</textarea>
+            </div>
+            <button class="btn btn-success mb-3" onclick="updateClubDetails(${club.id})">Save Changes</button>
+            <button class="btn btn-warning mb-3 ms-2" data-bs-toggle="modal" data-bs-target="#addActivityModal">➕ Add New Activity</button>
+
             <p><strong>Total Members:</strong> ${club.total_members}</p>
             <p><strong>Finance (KES):</strong> ${club.total_registration}</p>
-            <p><strong>Activities:</strong><br>${club.activities || 'None'}</p>
 
             <hr>
             <h5>Add Member</h5>
@@ -223,27 +238,36 @@ function viewClubDetails(clubId) {
             <button class="btn btn-outline-dark mt-3" id="backToList">← Back to All Clubs</button>
           </div>
         </div>
+
+        <!-- Modal injected dynamically -->
+        <div class="modal fade" id="addActivityModal" tabindex="-1" aria-labelledby="addActivityModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addActivityModalLabel">Add New Activity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <input type="text" id="activityName" class="form-control mb-2" placeholder="Activity Name">
+                <input type="date" id="activityDate" class="form-control mb-2">
+                <input type="number" id="activityAmount" class="form-control mb-2" placeholder="Amount Collected (KES)">
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success" onclick="submitNewActivity()">Add Activity</button>
+              </div>
+            </div>
+          </div>
+        </div>
       `;
 
-      // Attach event listeners after HTML is rendered
-      const backButton = document.getElementById('backToList');
-      if (backButton) backButton.addEventListener('click', loadViewClubs);
-
-      const searchInput = document.getElementById('studentSearchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-          // pass clubId if needed
-          searchStudent(e.target.value, club.id); 
-        });
-      }
-
-      const addBtn = document.getElementById('addSelectedStudentBtn');
-      if (addBtn) {
-        addBtn.addEventListener('click', () => {
-          // Implement this function
-          addSelectedStudentToClub(club.id); 
-        });
-      }
+      document.getElementById('backToList').addEventListener('click', loadViewClubs);
+      document.getElementById('studentSearchInput').addEventListener('input', (e) => {
+        searchStudent(e.target.value, club.id);
+      });
+      document.getElementById('addSelectedStudentBtn').addEventListener('click', () => {
+        addSelectedStudentToClub(club.id);
+      });
     })
     .catch(err => {
       showAlert('Failed to fetch club details.', 'danger');
@@ -252,8 +276,8 @@ function viewClubDetails(clubId) {
 }
 
 
-let selectedStudentId = null;
 
+let selectedStudentId = null;
 function searchStudent(query) {
   if (!query) return;
 
@@ -308,9 +332,51 @@ function addSelectedStudentToClub(clubId) {
     });
 }
 
+function updateClubDetails(clubId) {
+  const patronName = document.getElementById('editPatronName').value.trim();
+  const regFee = document.getElementById('editRegFee').value.trim();
+  const activities = document.getElementById('editActivities').value.trim();
+
+  fetch('api/update_club.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ club_id: clubId, patron_name: patronName, registration_fee: regFee, activities })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('Club updated successfully.', 'success');
+        // Refresh view
+        viewClubDetails(clubId); 
+      } else {
+        showAlert('Failed to update club.', 'danger');
+      }
+    })
+    .catch(err => {
+      showAlert('Error updating club.', 'danger');
+      console.error(err);
+    });
+}
 
 
+function deleteClub(clubId) {
+  if (!confirm('Are you sure you want to delete this club?')) return;
 
+  fetch(`api/delete_club.php?id=${clubId}`, { method: 'DELETE' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('Club deleted successfully.', 'success');
+        loadViewClubs();
+      } else {
+        showAlert('Failed to delete club.', 'danger');
+      }
+    })
+    .catch(err => {
+      showAlert('Error deleting club.', 'danger');
+      console.error(err);
+    });
+}
 
 
 
@@ -453,3 +519,39 @@ function deleteStudent(id) {
   }
 }
 
+function submitNewActivity() {
+  const name = document.getElementById('activityName').value.trim();
+  const date = document.getElementById('activityDate').value;
+  const amount = parseInt(document.getElementById('activityAmount').value);
+  const clubId = window.currentClubId;
+
+  if (!name || !date || isNaN(amount)) {
+    showAlert('Please fill all activity fields.', 'warning');
+    return;
+  }
+
+  fetch('api/add_activity.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      club_id: clubId,
+      activity_name: name,
+      date_of_activity: date,
+      amount_collected: amount
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('Activity added successfully.', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('addActivityModal')).hide();
+        viewClubDetails(clubId); // Refresh view
+      } else {
+        showAlert('Error adding activity: ' + (data.error || ''), 'danger');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showAlert('Network error. Try again.', 'danger');
+    });
+}
