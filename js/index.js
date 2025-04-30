@@ -236,6 +236,9 @@ function viewClubDetails(clubId) {
       });
       // ✅ View Members button handler
       document.getElementById('viewMemberDetails').onclick = () => viewClubMembers(club.id);
+      // ✅ View Finances button handler
+      document.getElementById('viewFinaceDetails').onclick = () => viewClubfinaces(club.id);
+
     })
     .catch(err => {
       showAlert('Failed to load club details.', 'danger');
@@ -250,6 +253,7 @@ function viewClubMembers(clubId) {
       document.getElementById('main-content').innerHTML = html;
       window.currentClubId = clubId;
       loadClubMembers(clubId);
+      document.getElementById('backToList').onclick = loadViewClubs;
     })
     .catch(err => {
       showAlert('Failed to load club members view.', 'danger');
@@ -748,5 +752,57 @@ function reactivateMember(memberId) {
     .catch(err => {
       console.error(err);
       showAlert("Something went wrong", "danger");
+    });
+}
+
+
+/**
+ * 
+ * Manage club finances generated from club activities, including registration fees and
+expenses.
+ */
+
+function loadClubfinaces(clubId) {
+  fetch(`api/get_club_finances.php?club_id=${clubId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        showAlert("Finance details not found", "danger");
+        return;
+      }
+
+      const f = data.finance;
+      document.getElementById("clubFinanceName").innerText = f.club_name;
+
+      document.getElementById("totalRegistration").innerText = f.total_registration;
+      document.getElementById("totalActivityIncome").innerText = f.total_activity_income;
+      document.getElementById("ongoingActivitiesFund").innerText = f.ongoing_activities_fund;
+      document.getElementById("annualPartyFund").innerText = f.annual_party_fund;
+      document.getElementById("savings").innerText = f.savings;
+      document.getElementById("schoolContribution").innerText = f.school_contribution;
+      document.getElementById("totalAmount").innerText = f.total_amount;
+      document.getElementById("lastUpdated").innerText = f.last_updated;
+
+      // Show section or modal
+      document.getElementById("financeDetailsSection").classList.remove("d-none");
+    })
+    .catch(err => {
+      console.error(err);
+      showAlert("Failed to load finance data", "danger");
+    });
+}
+
+function viewClubfinaces(clubId) {
+  fetch('html/track_finances.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('main-content').innerHTML = html;
+      window.currentClubId = clubId;
+      loadClubfinaces(clubId);
+      document.getElementById('backToList').onclick = loadViewClubs;
+    })
+    .catch(err => {
+      showAlert('Failed to load club members view.', 'danger');
+      console.error(err);
     });
 }
