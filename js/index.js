@@ -21,7 +21,7 @@ fetch('html/navbar.html')
       }, { once: true });
     }
       // This will load the students info
-    const studentsLink = document.getElementById("view-students-link");
+    const studentsLink = document.getElementById('a[href="#view-students]"');
     if (studentsLink) {
       studentsLink.addEventListener("click", function (e) {
         e.preventDefault();
@@ -177,7 +177,7 @@ function fetchClubDetails() {
               <strong>Total Collected:</strong> KES ${club.total_registration}<br>
               <strong>Activities:</strong> ${club.activities || 'None'}
             </p>
-            <button class="btn btn-outline-primary btn-sm" data-club-id="${club.id}">View More</button>
+            <button class="btn btn-outline-primary btn-sm" onclick="viewClubDetails(${club.id})">View More</button>
           </div>
         `;
         container.appendChild(card);
@@ -198,105 +198,59 @@ function fetchClubDetails() {
 }
 
 function viewClubDetails(clubId) {
-  fetch(`api/get_single_club.php?id=${clubId}`)
+  fetch('html/club_details.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('main-content').innerHTML = html;
+
+      // Now fetch the club data
+      return fetch(`api/get_single_club.php?id=${clubId}`);
+    })
     .then(res => res.json())
     .then(club => {
-      window.currentClubId = clubId; // For use in other functions
+      window.currentClubId = clubId;
       window.clubActivities = JSON.parse(club.activities || '[]');
 
-      const container = document.getElementById('main-content');
-      container.innerHTML = `
-        <div class="card shadow-sm">
-          <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-            <h4>${club.name} - Detailed View</h4>
-            <button class="btn btn-danger btn-sm" onclick="deleteClub(${club.id})">Delete Club</button>
-          </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <label><strong>Club Patron:</strong></label>
-              <input type="text" class="form-control" id="editPatronName" value="${club.patron_name}">
-            </div>
-            <div class="mb-3">
-              <label><strong>Registration Fee (KES):</strong></label>
-              <input type="number" class="form-control" id="editRegFee" value="${club.registration_fee}">
-            </div>
-            <p><strong>Total Members:</strong> ${club.total_members}</p>
-            <p><strong>Finance (KES):</strong> ${club.total_income}</p>
-            <div class="mb-3">
-              <label><strong>Activities:</strong></label>
-              <table class="table table-bordered">
-                <thead class="table-secondary">
-                  <tr>
-                    <th>Name</th>
-                    <th>Date</th>
-                    <th>Amount (KES)</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="activitiesTableBody">
-                  ${
-                    window.clubActivities.map((act, index) => `
-                      <tr data-index="${index}">
-                        <td><input type="text" class="form-control" value="${act.name}" onchange="updateActivityField(${index}, 'name', this.value)"></td>
-                        <td><input type="date" class="form-control" value="${act.date}" onchange="updateActivityField(${index}, 'date', this.value)"></td>
-                        <td><input type="number" class="form-control" value="${act.amount}" onchange="updateActivityField(${index}, 'amount', this.value)"></td>
-                        <td><button class="btn btn-sm btn-danger" onclick="deleteActivity(${index})">🗑️</button></td>
-                      </tr>
-                    `).join('')
-                  }
-                </tbody>
-              </table>
-            </div>
+      // Populate HTML fields
+      document.getElementById('club-details-card').setAttribute('data-club-id', club.id);
+      document.getElementById('club-name-title').textContent = `${club.name} - Detailed View`;
+      document.getElementById('editPatronName').value = club.patron_name;
+      document.getElementById('editRegFee').value = club.registration_fee;
+      document.getElementById('total-members').textContent = club.total_members;
+      document.getElementById('total-income').textContent = club.total_income;
 
-            <button class="btn btn-success mb-3" onclick="updateClubDetails(${club.id})">Save Changes</button>
-            <button class="btn btn-warning mb-3 ms-2" data-bs-toggle="modal" data-bs-target="#addActivityModal">➕ Add New Activity</button>
-            <hr>
-            <h5>Add Member</h5>
-            <input type="text" id="studentSearchInput" placeholder="Search by name or admission" class="form-control mb-2">
-            <ul id="studentSearchResults" class="list-group mb-2"></ul>
-            <button class="btn btn-primary" id="addSelectedStudentBtn" disabled>Add to Club</button>
-            <br>
-            <button class="btn btn-outline-dark mt-3" id="backToList">← Back to All Clubs</button>
-          </div>
-        </div>
+      renderActivitiesTable();
 
-        <!-- Modal injected dynamically -->
-        <div class="modal fade" id="addActivityModal" tabindex="-1" aria-labelledby="addActivityModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="addActivityModalLabel">Add New Activity</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <input type="text" id="activityName" class="form-control mb-2" placeholder="Activity Name">
-                <input type="date" id="activityDate" class="form-control mb-2">
-                <input type="number" id="activityAmount" class="form-control mb-2" placeholder="Amount Collected (KES)">
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-success" onclick="submitNewActivity()">Add Activity</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
 
-      // Event Listeners
-      document.getElementById('backToList').addEventListener('click', loadViewClubs);
+      // Attach all event listeners now that DOM is ready
+      document.getElementById('saveChangesBtn').onclick = () => updateClubDetails(clubId);
+      document.getElementById('delete-club-btn').onclick = () => deleteClub(clubId);
+      document.getElementById('backToList').onclick = loadViewClubs;
+
       document.getElementById('studentSearchInput').addEventListener('input', (e) => {
         searchStudent(e.target.value, club.id);
       });
+
       document.getElementById('addSelectedStudentBtn').addEventListener('click', () => {
         addSelectedStudentToClub(club.id);
       });
     })
     .catch(err => {
-      showAlert('Failed to fetch club details.', 'danger');
+      showAlert('Failed to load club details.', 'danger');
       console.error(err);
     });
 }
 
+function renderActivitiesTable() {
+  const tbody = document.getElementById('activitiesTableBody');
+  tbody.innerHTML = window.clubActivities.map((act, index) => `
+    <tr data-index="${index}">
+      <td><input type="text" class="form-control" value="${act.name}" onchange="updateActivityField(${index}, 'name', this.value)"></td>
+      <td><input type="date" class="form-control" value="${act.date}" onchange="updateActivityField(${index}, 'date', this.value)"></td>
+      <td><input type="number" class="form-control" value="${act.amount}" onchange="updateActivityField(${index}, 'amount', this.value)"></td>
+    </tr>
+  `).join('');
+}
 
 function updateClubDetails(clubId) {
   const patronName = document.getElementById('editPatronName').value.trim();
@@ -343,9 +297,13 @@ function updateActivityField(index, field, value) {
 }
 
 function deleteActivity(index) {
+  // Remove the activity from the list
   window.clubActivities.splice(index, 1);
-  viewClubDetails(window.currentClubId);
+
+  // Just re-render the table without fetching data again
+  renderActivitiesTable();
 }
+
 
 function submitNewActivity() {
   const name = document.getElementById('activityName').value.trim();

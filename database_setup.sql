@@ -41,7 +41,7 @@ CREATE TABLE memberships (
 CREATE TABLE club_activities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     club_id INT,
-    activity_name VARCHAR(100) NOT NULL,
+    activity_name VARCHAR(100) NOT NULL UNIQUE,
     date_of_activity DATE NOT NULL,
     amount_collected INT NOT NULL,
     FOREIGN KEY (club_id) REFERENCES clubs(id)

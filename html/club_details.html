@@ -1,0 +1,65 @@
+<!-- club_details.html -->
+<div class="card shadow-sm" id="club-details-card" data-club-id="">
+    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+      <h4 id="club-name-title"></h4>
+      <button class="btn btn-danger btn-sm" id="delete-club-btn">Delete Club</button>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label><strong>Club Patron:</strong></label>
+        <input type="text" class="form-control" id="editPatronName">
+      </div>
+      <div class="mb-3">
+        <label><strong>Registration Fee (KES):</strong></label>
+        <input type="number" class="form-control" id="editRegFee">
+      </div>
+      <p><strong>Total Members:</strong> <span id="total-members"></span></p>
+      <p><strong>Finance (KES):</strong> <span id="total-income"></span></p>
+  
+      <div class="mb-3">
+        <label><strong>Activities:</strong></label>
+        <table class="table table-bordered">
+          <thead class="table-secondary">
+            <tr>
+              <th>Name</th>
+              <th>Date</th>
+              <th>Amount (KES)</th>
+            </tr>
+          </thead>
+          <tbody id="activitiesTableBody"></tbody>
+        </table>
+      </div>
+  
+      <button class="btn btn-success mb-3" id="saveChangesBtn">Save Changes</button>
+      <button class="btn btn-warning mb-3 ms-2" data-bs-toggle="modal" data-bs-target="#addActivityModal">➕ Add New Activity</button>
+      <hr>
+      <h5>Add Member</h5>
+      <input type="text" id="studentSearchInput" placeholder="Search by name or admission" class="form-control mb-2">
+      <ul id="studentSearchResults" class="list-group mb-2"></ul>
+      <button class="btn btn-primary" id="addSelectedStudentBtn" disabled>Add to Club</button>
+      <br>
+      <button class="btn btn-outline-dark mt-3" id="backToList">← Back to All Clubs</button>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="addActivityModal" tabindex="-1" aria-labelledby="addActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="addActivityModalLabel">Add New Activity</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="activityName" class="form-control mb-2" placeholder="Activity Name">
+          <input type="date" id="activityDate" class="form-control mb-2">
+          <input type="number" id="activityAmount" class="form-control mb-2" placeholder="Amount Collected (KES)">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success" onclick="submitNewActivity()">Add Activity</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
